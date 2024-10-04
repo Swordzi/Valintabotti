@@ -1,0 +1,9 @@
+Ohjeet:
+
+1. Laita wilmatunnuksesi sähköposti ja salasana credits.json tiedostoon, joka löytyy tiedot kansiosta.
+
+2. Seuraavaksi avaa wilma selaimellasi ja mene kurssitarjoittimeen. Avaa tiedot kansiosta löytyvä trays.json tiedosto. 
+
+3. Kopioi kurssitarjoittimien nimet kohtaan, jossa lukee TARJOITTIMENNIMITÄHÄN. 
+
+4. Sitten kopioi kaikkien haluamiesi kurssien nimet sen alle kohtiin "ESIMERKKIKURSSI". Muista, että tarjoittimien ja kurssien nimet pitää olla kirjoitettu täysin samoin kuin Wilmassa. 
