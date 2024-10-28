@@ -1,0 +1,6 @@
+geckodriver.log
+tiedot
+venv
+.idea
+build
+dist
