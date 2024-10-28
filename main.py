@@ -1,17 +1,16 @@
 import json
+import time
+import schedule
 from selenium import webdriver
 from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException
 from selenium.webdriver.common.by import By
-import time
-import schedule
-
 
 # Start up perf counter
 tic = time.perf_counter()
+
+
 def login(driver: webdriver.Firefox):
-
     driver.get("https://ouka.inschool.fi/")
-
 
     # Hanki kirjautumistiedot
     with open('tiedot/creds.json', 'r') as json_string:
@@ -29,9 +28,8 @@ def login(driver: webdriver.Firefox):
 
 
 def open_trays(driver: webdriver.Firefox):
-    trays_url = driver.current_url + "trays"
+    trays_url = driver.current_url + "selection/view?"
     driver.get(trays_url)
-    driver.find_element("id", 'continue-button').click()
     driver.find_element("id", "tray-selection-on-first-click").click()
 
 def select_courses(driver: webdriver.Firefox, tray):
@@ -44,7 +42,7 @@ def select_courses(driver: webdriver.Firefox, tray):
             return True
         except ElementClickInterceptedException:
             return False
-        
+
     driver.implicitly_wait(0.25)
 
     for course in tray["courses"]:
@@ -52,15 +50,17 @@ def select_courses(driver: webdriver.Firefox, tray):
             continue
 
         print(f"    ilmoittaudutaan kurssille {course['name']:<20}... ", end="")
+
         try:
-            course_element = driver.find_element("xpath", f'//li[@class="palkki"]/a[starts-with(normalize-space(),"{course["name"]}")]')
+            course_element = driver.find_element("xpath",
+                                                 f'//li[@class="palkki"]/a[starts-with(normalize-space(),"{course["name"]}")]')
         except NoSuchElementException:
             print(f"kurssia {course['name']} ei löytynyt")
             continue
 
         for klass in course_element.get_attribute("class").split():
             clean_klass = klass.strip()
-            
+
             if klass.strip().startswith("ksuor-") or clean_klass == "disa":
                 print("kurssi suoritettu tai ryhmä lukittu/täynnä")
                 break
@@ -85,7 +85,6 @@ def select_courses(driver: webdriver.Firefox, tray):
 def load_trays():
     trays = []
     with open('tiedot/kurssit.json', encoding='utf-8') as f:
-
         raw_trays = json.loads(f.read())['trays']
         for raw_tray in raw_trays:
             tray = {
@@ -102,6 +101,7 @@ def load_trays():
 
     return trays
 
+
 def print_trays(trays, only_not_confirmed=False):
     for tray in trays:
         print(tray['name'])
@@ -113,6 +113,7 @@ def print_trays(trays, only_not_confirmed=False):
                 courses_to_print.append(course['name'])
 
         print(", ".join(courses_to_print))
+
 
 def count_confirmed(trays):
     courses = 0
@@ -126,6 +127,7 @@ def count_confirmed(trays):
 
     return courses, confirmed
 
+
 def main(driver, trays):
     open_trays(driver)
 
@@ -134,7 +136,7 @@ def main(driver, trays):
         for tray in trays:
             print(f"\nTarjotin: {tray['name']}")
             select_courses(driver, tray)
-        
+
         courses, confirmed = count_confirmed(trays)
         print(f"\n{confirmed}/{courses} kurssia valittua")
         print("Kurssit joita ei saatu valittua: \n")
@@ -148,13 +150,12 @@ def main(driver, trays):
         global tic
         print(f"Valinnat suoritettu {toc - tic:0.4f} sekuntissa")
         tic = time.perf_counter()
-        print("Yritetään 5s päästä uudelleen siltä varalta, että wilma on tukossa. Paina CTRL + C poistuaksesi.")
-        time.sleep(5)
         driver.refresh()
-    
+
     return schedule.CancelJob
 
-def loader(starttime, test=False):
+
+def loader():
     driver = webdriver.Firefox()
 
     login(driver)
@@ -165,17 +166,6 @@ def loader(starttime, test=False):
     print("Tarjotin: ")
     print_trays(trays)
 
-    if test:
-        main(driver, trays)
-        return
-    
-    schedule.every().day.at(starttime).do(main, driver, trays)
-    print(f"Odotetaan {starttime}...")
+    main(driver, trays)
 
-    while True:
-        schedule.run_pending()
-        time.sleep(5)
-
-
-#loader(aloitus aika, [True | False] True ohittaa aloitusajan odotuksen )
-loader('16:15', True)
+loader()
