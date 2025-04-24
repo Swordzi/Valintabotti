@@ -33,7 +33,7 @@ def open_trays(driver: webdriver.Firefox):
     driver.find_element("id", "tray-selection-on-first-click").click()
 
 def select_courses(driver: webdriver.Firefox, tray):
-    open_tray_button = driver.find_element("xpath", f'//a[normalize-space()="{tray["name"]}"]')
+    open_tray_button = driver.find_element("xpath", tray["name"])
     open_tray_button.click()
 
     def course_click(course_elem):
